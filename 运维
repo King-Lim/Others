@@ -21,3 +21,62 @@
         *将新盘与后损坏的盘置换，待其rebuild完成；
         *更换剩余坏盘；
         【现场情况为硬盘无物理损坏，不清楚硬盘offline的原因，可尝试重新拉取至online状态，则服务器系统可正常运行，此时便可备份数据】
+
+@2021.11.14
+    Ansible开源自动化运维工具
+        特点：
+            *基于Python开发，二次开发相对容易；
+            *管理模式简单，一条命令可以影响上千台主机；
+            *无客户端模式，底层通过SSH通信；
+        Ansible工具集：
+            Ansible工具集包含Inventory、Modules、Plugins和API；
+            *Ansible Playbooks：任务脚本，编排定义Ansible任务及的任务文件，由Ansible按序依次执行，通常是JSON格式的YML文件；
+            *Inventory：Ansible管理主机清单；
+            *Modules：Ansible执行命令功能模块，多数为内置的核心模块，也可自定义；
+            *Plugins：模块功能的补充，如连接类型插件、循环插件、变量插件、过滤插件等，该功能不常用；
+            *API：供第三方程序调用的应用程序编程接口；
+            *Ansible：该部分图中表现不太明显，组合Inventory、API、Modules、Plugins可以理解为是ansible命令工具，为核心执行工具；
+        Ansible配置：
+            *ansible安装
+            以RPM安装为例，其依赖软件只有Python和SSH，且系统默认均已安装。Ansible的管理端只能是Linux；
+            1）通过yum安装Ansible
+                vim /etc/yum.repos.d/local.repo         #修改yum路径
+                yum -y install ansible                  #安装ansible自动化运维工具
+            2）验证安装结果
+                ansible --version                       #如果命令可以正常运行，表示Ansible工具安装成功
+            3）创建SSH免交互登录
+                SSH包含两种认证方式：密码认证与密钥对认证；前者必须和系统交互，后者是免交互登录；
+                    如果希望通过ansible自动管理设备，应该配置为免交互登录被管理设备；
+                [root@centos01 ~]# ssh-keygen -t rsa  
+                <!--生成密钥对-->
+                Generating public/private rsa key pair.Enter file in which to save the key (/root/.ssh/id_rsa):
+                <!--密钥对存放路径-->
+                Created directory '/root/.ssh'.Enter passphrase (empty for no passphrase):       
+                <!--输入私钥保护密码，直接按Enter键表示无密码-->
+                Enter same passphrase again:    
+                <!--再次输入-->
+                Your identification has been saved in /root/.ssh/id_rsa.
+                Your public key has been saved in /root/.ssh/id_rsa.pub.
+                The key fingerprint is:
+                SHA256:cJz6NRTrvMDxX+Jpce6LRnWI3vVEl/zvARL7D10q9WY root@centos01
+                The key's randomart image is:
+                +---[RSA 2048]----+
+                |          .   . .|
+                |       . . +   oo|
+                |      . = o o. oo|
+                |       = * o..+ *|
+                |      . S *.=+=*+|
+                |       . o =+XooE|
+                |        . ..=.++.|
+                |           ..o ..|
+                |           .. o. |
+                +----[SHA256]-----+
+                [root@centos01 ~]# ssh-copy-id -i .ssh/id_rsa.pub  root@192.168.100.20  
+                <!--复制公钥到远端192.168.100.20-->
+                [root@centos01 ~]# ssh-copy-id -i .ssh/id_rsa.pub  root@192.168.100.30    
+                <!--复制公钥到远端192.168.100.30-->
+            *ansible配置
+                Inventory是Ansible管理主机的配置文件，相当于系统的hosts文件的功能，默认存放在/etc/ansible/hosts;
+                ansible -i /etc/ansible/hosts web -m ping           #使用选项-i或-inventory-file来指定Inventory
+                ansible web -m ping                                 #使用默认的Inventory文件（/etc/ansible/hosts），可以不用指定
+            *https://www.zhihu.com/search?type=content&q=ansible【#ansible相关资料】
